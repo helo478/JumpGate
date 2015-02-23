@@ -5,6 +5,6 @@ header('Content-type:application/json');
 
 include('../../resources/main/php/library.php');
 
-//testFunction();
+testFunction();
 
 ?>

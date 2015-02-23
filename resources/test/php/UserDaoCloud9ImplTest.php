@@ -2,43 +2,42 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-
-//echo 'contents of current directory: ' . implode(', ', scandir('../../main/php')); 
-
 require_once("simpletest/autorun.php");
 require_once("../../main/php/UserDaoCloud9Impl.php");
 
 class UserDaoCloud9ImplTest extends UnitTestCase {
 
+
     private $mysqli;
-    private $host;
-    private $user;
-    private $password = '';
-    private $database = 'jumpgate';
-    private $port = 3306;
     
     private $table = 'users';
 
     private $alias1 = "testAlias1";
-    private $passwordHash1 = "ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEF";
-    private $fname1 = "testFirstName1";
-    private $lname1 = "testLastName1";
     private $email1 = "testEmail1";
+    
+    private $alias2 = "testAlias2";
+    private $email2 = "testEmail2";
+    
+    private $passwordHash = "ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEF";
+    private $fname = "testFirstName";
+    private $lname = "testLastName";
     
     function __construct()
     {
         parent::__construct();
         
-        $this->host = getenv('IP');
-        $this->user = getenv('C9_USER');
-        
-        $this->mysqli = new mysqli($this->host, $this->user, $this->password, 
-            $this->database, $this->port);
+        // Set up the mysqli object
+        $host = getenv('IP');
+        $user = getenv('C9_USER');    
+        $password = '';
+        $database = 'jumpgate';
+        $port = 3306;
+        $this->mysqli = new mysqli($host, $user, $password, $database, $port);
         if (!$this->mysqli) {
             die('Connection failed: ' . $this->mysqli->connect_error);
         }
     }
-    
+
     function setUp()
     {
         $dao = new UserDaoCloud9Impl();
@@ -60,8 +59,8 @@ class UserDaoCloud9ImplTest extends UnitTestCase {
     function testCreateUser_shouldAddARowToTable()
     {
         $dao = new UserDaoCloud9Impl();
-        $dao->createUser($this->alias1, $this->passwordHash1, $this->fname1, 
-            $this->lname1, $this->email1);
+        $dao->createUser($this->alias1, $this->passwordHash, $this->fname, 
+            $this->lname, $this->email1);
             
         $expected = 1;
         $actual = $this->_getRowCount();
@@ -69,22 +68,51 @@ class UserDaoCloud9ImplTest extends UnitTestCase {
         $this->assertEqual($expected, $actual);
     }
     
+    function testCreateUser_shouldReturnTrue()
+    {
+        $dao = new UserDaoCloud9Impl();
+            
+        $expected = true;
+        $actual = $dao->createuser($this->alias1, $this->passwordHash, 
+            $this->fname, $this->lname, $this->email1);
+        
+        $this->assertEqual($expected, $actual);
+    }
+    
+    function testCreateuser_2NewUsers_shouldReturnTrue()
+    {
+        $dao = new UserDaoCloud9Impl();
+        $dao->createuser($this->alias1, $this->passwordHash, $this->fname,
+            $this->lname, $this->email1);
+        
+        $expected = true;
+        $actual = $dao->createuser($this->alias2, $this->passwordHash, 
+            $this->fname, $this->lname, $this->email2);
+            
+        $this->assertEqual($expected, $actual);
+    }
+    
+    function testCreateUser_duplicateUser_shouldReturnFalse()
+    {
+        $dao = new UserDaoCloud9Impl();
+        $dao->createuser($this->alias1, $this->passwordHash, $this->fname,
+            $this->lname, $this->email1);
+        
+        $expected = false;
+        $actual = $dao->createuser($this->alias1, $this->passwordHash, 
+            $this->fname,  $this->lname, $this->email1);
+        
+        $this->assertEqual($expected, $actual);
+        
+    }
+    
     function testClearAll_tableShouldHave0Rows()
     {
         $dao = new UserDaoCloud9Impl();
-        $dao->createUser($this->alias1, $this->passwordHash1, $this->fname1, 
-            $this->lname1, $this->email1);
+        $dao->createUser($this->alias1, $this->passwordHash, $this->fname, 
+            $this->lname, $this->email1);
         $dao->clearAll();
         
-        $sql = "SELECT COUNT(*) FROM `$this->table`";
-        $mysqli = new mysqli($this->host, $this->user, $this->password, 
-            $this->database, $this->port);
-        if (!$mysqli) {
-            die('Connection failed: ' . $this->mysqli->connect_error);
-        }
-        
-        $result = $mysqli->query($sql);
-            
         $expected = 0;
         $actual = $this->_getRowCount();
         
@@ -98,5 +126,7 @@ class UserDaoCloud9ImplTest extends UnitTestCase {
         return $result->fetch_array()[0];
     }
 }
+
+echo "test";
 
 ?>
