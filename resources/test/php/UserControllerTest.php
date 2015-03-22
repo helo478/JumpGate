@@ -25,6 +25,14 @@ class UserControllerTest extends UnitTestCase
         $this->assertNotNull($this->controller);
     }
     
+    function testToString_shouldBeClassNameAndInstanceNumber()
+    {
+        $this->controller = new UserController($this->mockDao);
+        $expected = 'UserController';
+        $actual = (string)$this->controller;
+        $this->assertEqual($expected, substr($actual, 0, strlen('UserController')));
+    }
+    
     function testCreateUser_shouldCallDaoCreateUserOnce()
     {
         $this->mockDao->returns('createUser', 1);

@@ -3,8 +3,19 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 header('Content-type:application/json');
 
-include('../../resources/main/php/library.php');
+require_once('../../resources/main/php/library.php');
 
-testFunction();
+echo (string)getGlobalUserController();
+
+function getGlobalUserController() {
+
+    if(!isset($GLOBALS['userController']))
+    {
+        $dao = UserDaoFactory::getInstance();
+        $GLOBALS['userController'] = new UserController($dao);
+    }
+    
+    return $GLOBALS['userController'];
+}
 
 ?>

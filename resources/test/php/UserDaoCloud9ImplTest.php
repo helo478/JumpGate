@@ -127,6 +127,4 @@ class UserDaoCloud9ImplTest extends UnitTestCase {
     }
 }
 
-echo "test";
-
 ?>
